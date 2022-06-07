@@ -70,10 +70,20 @@ def visualize_flow(flow: np.ndarray, save_file: str = None) -> np.ndarray:
     """
 
     # return value from mmcv.flow2rgb is [0, 1.] with type np.float32
-    flow_map = np.uint8(mmcv.flow2rgb(flow) * 255.)
-    if save_file:
-        plt.imsave(save_file, flow_map)
-    return flow_map
+    # flow_map = np.uint8(mmcv.flow2rgb(flow) * 255.)
+    # if save_file:
+    #     plt.imsave(save_file, flow_map)
+    # return flow_map
+    # flow = cv2.resize(flow, (1242,375), interpolation = cv2.INTER_AREA)
+    flow = (flow + 512)*64
+    mask = np.ones((flow.shape[0],flow.shape[1]))
+    flow_kitti_format = np.zeros([flow.shape[0],flow.shape[1],3])
+    flow_kitti_format[:,:,2] = flow[:,:,0]
+    flow_kitti_format[:,:,1] = flow[:,:,1]
+    flow_kitti_format[:,:,0] = mask
+    flow_kitti_format = flow_kitti_format.astype(np.uint16)
+    # assert(flow_kitti_format.shape[0] != 1242)
+    cv2.imwrite(save_file,flow_kitti_format)
 
 
 def render_color_wheel(save_file: str = 'color_wheel.png') -> np.ndarray:

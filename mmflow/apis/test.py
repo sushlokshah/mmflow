@@ -4,7 +4,7 @@ import pickle
 import shutil
 import tempfile
 from typing import Any, Dict, List, Optional, Sequence
-
+import sys
 import mmcv
 import numpy as np
 import torch
@@ -54,12 +54,14 @@ def single_gpu_test(
     if out_dir is not None:
         mmcv.mkdir_or_exist(out_dir)
         for i, r in enumerate(results):
-            write_flow(r, osp.join(out_dir, f'flow_{i:03d}.flo'))
+            # print(r["flow"].shape)
+            # sys.exit(0)
+            write_flow(r["flow"], osp.join(out_dir, f'flow_{i:03d}.flo'))
 
     if show_dir is not None:
         mmcv.mkdir_or_exist(show_dir)
         for i, r in enumerate(results):
-            visualize_flow(r, osp.join(show_dir, f'flowmap_{i:03d}.png'))
+            visualize_flow(r["flow"], osp.join(show_dir, f'{i:06d}_10.png'))
 
     return results
 

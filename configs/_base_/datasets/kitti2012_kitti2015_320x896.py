@@ -62,13 +62,13 @@ test_pipeline = [
 
 kitti2015_train = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='/home/sushlok/optical_flow/dataset/data_scene_flow',
     pipeline=sparse_train_pipeline,
     test_mode=False)
 
 kitti2015_val_test = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='/home/sushlok/optical_flow/dataset/data_scene_flow',
     pipeline=test_pipeline,
     test_mode=True)
 
@@ -97,12 +97,12 @@ data = dict(
         shuffle=False,
         persistent_workers=True),
     test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=5, shuffle=False),
-    train=[kitti2015_train, kitti2012_train],
+    train=[kitti2015_train],
     val=dict(
         type='ConcatDataset',
-        datasets=[kitti2015_val_test, kitti2012_val_test],
+        datasets=[kitti2015_val_test],
         separate_eval=True),
     test=dict(
         type='ConcatDataset',
-        datasets=[kitti2015_val_test, kitti2012_val_test],
+        datasets=[kitti2015_val_test],
         separate_eval=True))
