@@ -2,7 +2,7 @@
 import argparse
 import os
 import warnings
-
+import time
 import mmcv
 import torch
 from mmcv import Config, DictAction
@@ -20,7 +20,8 @@ from mmflow.datasets import build_dataloader, build_dataset
 from mmflow.datasets.utils.flow_io import write_flow, write_flow_kitti
 from mmflow.models import build_flow_estimator
 from mmflow.utils import get_root_logger, setup_multi_processes
-
+import numpy as np
+import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -176,20 +177,26 @@ def main():
             broadcast_buffers=False)
 
     rank, _ = get_dist_info()
-
+    time_stat = []
     for i, i_data_loader in enumerate(data_loader):
 
         if args.out_dir:
 
             if not distributed:
-                outputs = single_gpu_test(
+                # start = time.time()
+                outputs, time_stat = single_gpu_test(
                     model,
                     i_data_loader,
                     out_dir=args.out_dir,
                     show_dir=args.show_dir)
+                # end = time.time()
+                # time_stat.append(end-start)
             else:
-                outputs = multi_gpu_test(model, i_data_loader, args.tmpdir,
+                # start = time.time()
+                outputs, time_stat = multi_gpu_test(model, i_data_loader, args.tmpdir,
                                          args.gpu_collect)
+                # end = time.time()
+                # time_stat.append(end-start)
                 if rank == 0:
                     print(f'\nwriting results to {args.out_dir}')
                     for i, output in enumerate(outputs):
@@ -207,7 +214,11 @@ def main():
                 f'{online_evaluation(model, i_data_loader, metric=args.eval)}'
                 '\n',
                 logger=get_root_logger())
-
+            
+    data = {"total_time" : np.array(time_stat)}
+    df = pd.DataFrame.from_dict(data)
+    # df.to_csv(csv_file_path)
+    print("time:\n", df.describe())
 
 if __name__ == '__main__':
     main()

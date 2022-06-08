@@ -10,7 +10,8 @@ import numpy as np
 import torch
 import torch.distributed as dist
 from mmcv.runner import get_dist_info
-
+import time 
+import numpy as np
 from mmflow.datasets.utils import visualize_flow, write_flow
 
 Module = torch.nn.Module
@@ -41,11 +42,15 @@ def single_gpu_test(
 
     model.eval()
     results = []
+    exec_time = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            start  = time.time()
             result = model(test_mode=True, **data)
+            end = time.time()
+            exec_time.append(end-start)
         batch_size = len(result)
         results += result
 
@@ -63,7 +68,7 @@ def single_gpu_test(
         for i, r in enumerate(results):
             visualize_flow(r["flow"], osp.join(show_dir, f'{i:06d}_10.png'))
 
-    return results
+    return results, exec_time
 
 
 def multi_gpu_test(
@@ -91,17 +96,21 @@ def multi_gpu_test(
     """
     model.eval()
     results = []
+    exec_time = []
     dataset = data_loader.dataset
     rank, world_size = get_dist_info()
     if rank == 0:
         prog_bar = mmcv.ProgressBar(len(dataset))
     for data in data_loader:
         with torch.no_grad():
+            start  = time.time()
             result = model(test_mode=True, **data)
             if result[0].get('flow', None) is not None:
                 result = [_['flow'] for _ in result]
             elif result[0].get('flow_fw', None) is not None:
                 result = [_['flow_fw'] for _ in result]
+            end = time.time()
+            exec_time.append(end-start)
         batch_size = len(result)
         results += result
 
@@ -115,7 +124,7 @@ def multi_gpu_test(
         results = collect_results_gpu(results, len(dataset))
     else:
         results = collect_results_cpu(results, len(dataset), tmpdir)
-    return results
+    return results, exec_time
 
 
 def collect_results_cpu(result_part: Any,
