@@ -37,7 +37,7 @@ kitti_train_pipeline = [
 ]
 kitti_train = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='../dataset/data_scene_flow',
     pipeline=kitti_train_pipeline,
     test_mode=False)
 
@@ -59,7 +59,7 @@ kitti_test_pipeline = [
 
 kitti2015_val_test = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='../dataset/data_scene_flow',
     pipeline=kitti_test_pipeline,
     test_mode=True)
 

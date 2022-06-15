@@ -61,12 +61,27 @@ def single_gpu_test(
         for i, r in enumerate(results):
             # print(r["flow"].shape)
             # sys.exit(0)
-            write_flow(r["flow"], osp.join(out_dir, f'flow_{i:03d}.flo'))
+            if r.get('flow', None) is not None:
+                write_flow(r["flow"], osp.join(out_dir, f'flow_{i:03d}.flo'))
+            elif result[0].get('flow_fw', None) is not None:
+                write_flow(r["flow_fw"], osp.join(out_dir, f'flow_{i:03d}.flo'))
+            # if(type(r) == dict):
+            #     write_flow(r["flow"], osp.join(out_dir, f'flow_{i:03d}.flo'))
+            # else:
+            #     write_flow(r, osp.join(out_dir, f'flow_{i:03d}.flo'))
 
     if show_dir is not None:
         mmcv.mkdir_or_exist(show_dir)
         for i, r in enumerate(results):
-            visualize_flow(r["flow"], osp.join(show_dir, f'{i:06d}_10.png'))
+            if r.get('flow', None) is not None:
+                visualize_flow(r["flow"], osp.join(show_dir, f'{i:06d}_10.png'))
+            elif result[0].get('flow_fw', None) is not None:
+                visualize_flow(r["flow_fw"], osp.join(show_dir, f'{i:06d}_10.png')) 
+
+            # if(type(r) == dict):
+            #     visualize_flow(r["flow"], osp.join(show_dir, f'{i:06d}_10.png'))
+            # else:
+            #     visualize_flow(r, osp.join(show_dir, f'{i:06d}_10.png')) 
 
     return results, exec_time
 

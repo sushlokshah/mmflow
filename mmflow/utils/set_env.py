@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os
 import platform
-
+import sys
 import cv2
 import torch.multiprocessing as mp
 
@@ -30,7 +30,8 @@ def setup_multi_processes(cfg):
         cv2.setNumThreads(opencv_num_threads)
     else:
         logger.info(f'OpenCV num_threads is `{cv2.getNumThreads()}')
-
+    # print(cfg.data)
+    # sys.exit(0)
     if cfg.data.train_dataloader.workers_per_gpu > 1:
         # setup OMP threads
         # This code is referred from https://github.com/pytorch/pytorch/blob/master/torch/distributed/run.py  # noqa
